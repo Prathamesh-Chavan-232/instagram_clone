@@ -1,2 +1,1 @@
-
 const webScreenSize = 600;

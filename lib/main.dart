@@ -1,12 +1,14 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:instagram_clone/globals.dart';
-import 'package:instagram_clone/responsive_layout/layout_screens/mobile_screen_layout.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:instagram_clone/screens/auth_pages/signup_screen.dart';
+import 'package:instagram_clone/screens/home_page/home.dart';
+import 'package:instagram_clone/utils/colors.dart';
+import 'package:instagram_clone/screens/auth_pages/login_screen.dart';
 import 'package:instagram_clone/responsive_layout/responsive_layout.dart';
 import 'package:instagram_clone/responsive_layout/layout_screens/web_screen_layout.dart';
-import 'package:instagram_clone/screens/auth_pages/login_screen.dart';
-import 'package:instagram_clone/utils/colors.dart';
+import 'package:instagram_clone/responsive_layout/layout_screens/mobile_screen_layout.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,13 +40,15 @@ class MyApp extends StatelessWidget {
         // textTheme: DEFAULT_TEXT_THEME
       ),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/login',
+      initialRoute: '/signup',
       routes: {
         '/start': (context) => const ResponsiveLayout(
               webScreen: WebScreenLayout(),
               mobileScreen: MobileScreenLayout(),
             ),
-        '/login' : (context) => const LoginScreen(),
+        '/home': (context) => const HomePage(),
+        '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignUpScreen(),
       },
     );
   }
