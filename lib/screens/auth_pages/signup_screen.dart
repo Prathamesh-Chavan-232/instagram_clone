@@ -1,9 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone/common_widgets/auth_widgets.dart';
 import 'package:instagram_clone/globals.dart';
 import 'package:instagram_clone/services/fireauth/fire_auth.dart';
-import 'package:instagram_clone/utils/colors.dart';
+import 'package:instagram_clone/common_utils/colors.dart';
+import 'package:instagram_clone/common_utils/Image_picker/img_picker.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -17,6 +19,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
+  Uint8List? _image;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,16 +50,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const InstaLogo(),
+                instaLogo(),
                 _selectProfilePhoto(context),
                 const SizedBox(height: 24),
                 _displaySignupFields(),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                const Divider(thickness: 1.5),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Already have an account? "),
-                    _switchToLogin(context)
+                  children: const [
+                    Text("Already have an account? "),
+                    SwitchAuth(btnText: "Log-in", path: '/login')
                   ],
                 ),
               ],
@@ -67,15 +76,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
       padding: const EdgeInsets.only(top: 18),
       height: MediaQuery.of(context).size.height * 0.20,
       child: Stack(children: [
-        const CircleAvatar(
-          backgroundImage: NetworkImage(DEFAULT_PROFILE_PICTURE),
-          radius: 64,
-        ),
+        _image != null
+            ? CircleAvatar(
+                backgroundImage: MemoryImage(_image!),
+                radius: 64,
+              )
+            : const CircleAvatar(
+                backgroundImage: NetworkImage(DEFAULT_PROFILE_PICTURE),
+                radius: 64,
+              ),
         Positioned(
             bottom: -15,
             left: 80,
             child: IconButton(
-              onPressed: () {},
+              onPressed: selectImage,
               icon: const Icon(Icons.add_a_photo),
             ))
       ]),
@@ -90,20 +104,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
           AuthTextField(
             hintText: 'User name',
             textEditingController: _usernameController,
-            textInputType: TextInputType.emailAddress,
+            textInputType: TextInputType.text,
           ),
           const SizedBox(height: 24),
           AuthTextField(
             hintText: 'Bio',
             textEditingController: _bioController,
-            textInputType: TextInputType.emailAddress,
+            textInputType: TextInputType.text,
           ),
           const SizedBox(height: 24),
           AuthTextField(
-            isPass: true,
             hintText: 'Email Address',
             textEditingController: _emailController,
-            textInputType: TextInputType.visiblePassword,
+            textInputType: TextInputType.emailAddress,
           ),
           const SizedBox(height: 24),
           AuthTextField(
@@ -127,22 +140,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
           backgroundColor: MaterialStateProperty.all(blueColor),
         ),
         onPressed: () async {
-          User res = await AuthMethods().signUp(_usernameController.text,
-              _bioController.text, _emailController.text, _passController.text);
-          Navigator.popAndPushNamed(context, '/home');
+          String res = await AuthService().signUpWithEmailAndPass(
+              profilePic: _image,
+              username: _usernameController.text,
+              bio: _bioController.text,
+              email: _emailController.text,
+              password: _passController.text);
+          if (res == "User Signed-in successfully") {
+            displayToast(res);
+            Navigator.popAndPushNamed(context, '/home');
+          } else {
+            displayToast(res);
+          }
         },
         child: Text(btnText),
       ),
     );
   }
 
-  TextButton _switchToLogin(BuildContext context) {
-    return TextButton(
-      onPressed: () {
-        Navigator.popAndPushNamed(context, '/login');
-      },
-      child: const Text('Log-in'),
-    );
+  void selectImage() async {
+    Uint8List img = await pickImage(ImageSource.gallery);
+    setState(() {
+      _image = img;
+    });
   }
 
   @override

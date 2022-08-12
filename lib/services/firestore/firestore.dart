@@ -4,8 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 class DatabaseService {
   final _db = FirebaseFirestore.instance;
 
-  Future addUser(User user, String username, String bio, String email) async {
+  Future addUser(User user, String profilePicUrl, String username, String bio,
+      String email) async {
     await _db.collection('users').doc(user.uid).set({
+      'profile-pic-url': profilePicUrl,
       'username': username,
       'email': email,
       'bio': bio,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:instagram_clone/utils/colors.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:instagram_clone/common_utils/colors.dart';
 
 class AuthTextField extends StatelessWidget {
   final bool isPass;
@@ -21,7 +22,6 @@ class AuthTextField extends StatelessWidget {
       borderSide: Divider.createBorderSide(context),
     );
     return TextField(
-      onTap: () {},
       controller: textEditingController,
       decoration: InputDecoration(
         filled: true,
@@ -37,15 +37,37 @@ class AuthTextField extends StatelessWidget {
   }
 }
 
-class InstaLogo extends StatelessWidget {
-  const InstaLogo({Key? key}) : super(key: key);
-
+class SwitchAuth extends StatelessWidget {
+  final String btnText;
+  final String path;
+  const SwitchAuth({required this.btnText, required this.path, Key? key})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return SvgPicture.asset(
-      'assets/ic_instagram.svg',
-      color: primaryColor,
-      height: 64,
+    return TextButton(
+      onPressed: () {
+        Navigator.popAndPushNamed(context, path);
+      },
+      child: Text(btnText),
     );
   }
+}
+
+Widget instaLogo() {
+  return SvgPicture.asset(
+    'assets/ic_instagram.svg',
+    color: primaryColor,
+    height: 64,
+  );
+}
+
+void displayToast(String toastMsg) {
+  Fluttertoast.showToast(
+      msg: toastMsg,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.black,
+      textColor: Colors.white,
+      fontSize: 14.0);
 }

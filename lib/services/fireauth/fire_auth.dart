@@ -1,33 +1,78 @@
+import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:instagram_clone/services/firebase_storage/firebase_storage.dart';
 import 'package:instagram_clone/services/firestore/firestore.dart';
 
-class AuthMethods {
+class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  Future signUp(
-      String username, String bio, String email, String password) async {
-    String res = "Creating User...";
+
+  Future<String> signUpWithEmailAndPass(
+      {required Uint8List? profilePic,
+      required String username,
+      required String bio,
+      required String email,
+      required String password}) async {
+    String res = "All Fields are required";
     try {
-      if (username.isNotEmpty && email.isNotEmpty && password.isNotEmpty) {
+      // Validate for Profile pic not selected
+      if (profilePic == null) {
+        res = "Please Select Profile Photo";
+      }
+
+      // Validate for empty Textfields
+      else if (username.isEmpty ||
+          bio.isEmpty ||
+          email.isEmpty ||
+          password.isEmpty) {
+        res = "Fields can't be empty";
+      }
+
+      // Proceed to Sign Up
+      else {
         UserCredential cred = await _auth.createUserWithEmailAndPassword(
             email: email, password: password);
 
-        // Add user to our database
-        DatabaseService().addUser(cred.user!, username, bio, email);
-        Fluttertoast.showToast(
-            msg: "This is Center Short Toast",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0);
+        // Store user's Profile Photo
+        String profilePicUrl = await StorageService()
+            .uploadImageToStorage("profile_pics", profilePic, false);
+
+        // Add user to cloud firestore
+        DatabaseService()
+            .addUser(cred.user!, profilePicUrl, username, bio, email);
+        res = "User created successfully";
+      }
+
+      return res;
+    } catch (err) {
+      print("Error in Signing-up : $err");
+      return err.toString();
+    }
+  }
+
+  Future loginWithEmailAndPass(
+      {required String email, required String password}) async {
+    try {
+      if (email.isNotEmpty && password.isNotEmpty) {
+        UserCredential cred = await _auth.signInWithEmailAndPassword(
+            email: email, password: password);
         return cred.user!;
       }
     } catch (err) {
-      print("User Sign-up failed, error - ${err.toString()}");
+      print("Error in logging-in : $err");
       return null;
     }
+  }
+
+  Future logOut() async {
+    try {
+      await _auth.signOut();
+    } catch (err) {
+      print("Error in signing-out : $err");
+    }
+  }
+
+  User? getCurrentUser() {
+    User? res = _auth.currentUser;
+    return res;
   }
 }
