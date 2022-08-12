@@ -14,21 +14,12 @@ class AuthService {
       required String password}) async {
     String res = "All Fields are required";
     try {
-      // Validate for Profile pic not selected
-      if (profilePic == null) {
-        res = "Please Select Profile Photo";
-      }
-
-      // Validate for empty Textfields
-      else if (username.isEmpty ||
-          bio.isEmpty ||
-          email.isEmpty ||
-          password.isEmpty) {
-        res = "Fields can't be empty";
-      }
-
       // Proceed to Sign Up
-      else {
+      if (profilePic != null &&
+          username.isNotEmpty &&
+          bio.isNotEmpty &&
+          email.isNotEmpty &&
+          password.isNotEmpty) {
         UserCredential cred = await _auth.createUserWithEmailAndPassword(
             email: email, password: password);
 
@@ -39,28 +30,48 @@ class AuthService {
         // Add user to cloud firestore
         DatabaseService()
             .addUser(cred.user!, profilePicUrl, username, bio, email);
-        res = "User created successfully";
+        res = "Success";
+      }
+    }
+    // Firebase Auth Exceptions - weak password / invalid email
+    on FirebaseAuthException catch (err) {
+      // Email Validation
+      if (err.code == 'invalid-email') {
+        res = "Invalid/Badly formatted email";
       }
 
-      return res;
+      // Password validation
+      else if (err.code == 'weak-password') {
+        res = "Password must have at least 6 characters";
+      }
     } catch (err) {
-      print("Error in Signing-up : $err");
-      return err.toString();
+      print("Error in signing-in: " + err.toString());
+      res = "Error in signing-in";
     }
+    return res;
   }
 
-  Future loginWithEmailAndPass(
+  Future<String> loginWithEmailAndPass(
       {required String email, required String password}) async {
+    String res = "";
     try {
-      if (email.isNotEmpty && password.isNotEmpty) {
-        UserCredential cred = await _auth.signInWithEmailAndPassword(
+      if (email.isEmpty || password.isEmpty) {
+        res = "Fields can't be empty";
+      } else {
+        await _auth.signInWithEmailAndPassword(
             email: email, password: password);
-        return cred.user!;
+        res = "Success";
+      }
+    } on FirebaseAuthException catch (err) {
+      // Email Validation
+      if (err.code == 'invalid-email') {
+        res = "Invalid/Badly formatted email";
       }
     } catch (err) {
-      print("Error in logging-in : $err");
-      return null;
+      print("Error in logging-in: " + err.toString());
+      res = "Error in logging-in";
     }
+    return res;
   }
 
   Future logOut() async {

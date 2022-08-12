@@ -21,20 +21,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _bioController = TextEditingController();
   Uint8List? _image;
 
+  late bool isloading;
+
   @override
   void initState() {
+    isloading = false;
     super.initState();
   }
 
+  /* Contents -
+    App logo image
+    Select Profile Photo - Image picker
+    Username Text field
+    Bio Text field
+    Email Text field
+    Password Text field
+    Swtich to Login
+    Signup button
+  */
+
+  /*
+    Use Single child scroll view here since this screen has lot of content
+    Add this padding on the widget that should be visible - EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+  */
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenheight = MediaQuery.of(context).size.height;
-    // App logo image
-    // Email Text field
-    // Password Text field
-    // Forgot & Swtich to Signup
-    // Login button
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SafeArea(
@@ -140,20 +153,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
           backgroundColor: MaterialStateProperty.all(blueColor),
         ),
         onPressed: () async {
+          setState(() => isloading = true);
+
           String res = await AuthService().signUpWithEmailAndPass(
               profilePic: _image,
               username: _usernameController.text,
               bio: _bioController.text,
               email: _emailController.text,
               password: _passController.text);
-          if (res == "User Signed-in successfully") {
-            displayToast(res);
+
+          setState(() => isloading = false);
+
+          if (res == "Success") {
             Navigator.popAndPushNamed(context, '/home');
           } else {
             displayToast(res);
           }
         },
-        child: Text(btnText),
+        child: isloading
+            ? const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: CircularProgressIndicator(color: primaryColor),
+              )
+            : Text(btnText),
       ),
     );
   }

@@ -53,6 +53,31 @@ class SwitchAuth extends StatelessWidget {
   }
 }
 
+Widget authButton(
+    {required String btnText,
+    required bool isloading,
+    required Function()? onPressed}) {
+  return SizedBox(
+    width: double.infinity,
+    child: ElevatedButton(
+      style: authButtonStyle(),
+      onPressed: onPressed,
+      child: isloading
+          ? const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: CircularProgressIndicator(color: primaryColor),
+            )
+          : Text(btnText),
+    ),
+  );
+}
+
+ButtonStyle authButtonStyle() {
+  return ButtonStyle(
+    backgroundColor: MaterialStateProperty.all(blueColor),
+  );
+}
+
 Widget instaLogo() {
   return SvgPicture.asset(
     'assets/ic_instagram.svg',
@@ -61,13 +86,13 @@ Widget instaLogo() {
   );
 }
 
-void displayToast(String toastMsg) {
-  Fluttertoast.showToast(
+Future displayToast(String toastMsg) async {
+  await Fluttertoast.showToast(
       msg: toastMsg,
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
       timeInSecForIosWeb: 1,
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.black.withOpacity(0.6),
       textColor: Colors.white,
       fontSize: 14.0);
 }
