@@ -56,32 +56,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
         height: screenheight,
         alignment: Alignment.bottomCenter,
         child: Padding(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: SingleChildScrollView(
-            reverse: true,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                instaLogo(),
-                _selectProfilePhoto(context),
-                const SizedBox(height: 24),
-                _displaySignupFields(),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-                const Divider(thickness: 1.5),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text("Already have an account? "),
-                    SwitchAuth(btnText: "Log-in", path: '/login')
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: SingleChildScrollView(
+              reverse: true,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    instaLogo(),
+                    _selectProfilePhoto(context),
+                    const SizedBox(height: 24),
+                    _displaySignupFields(),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                    const Divider(thickness: 1.5),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Text("Already have an account? "),
+                        SwitchAuth(btnText: "Log-in", path: '/login')
+                      ],
+                    ),
+                  ]),
+            )),
       )),
     );
+  }
+
+  // Add action sheet
+  void selectImage() async {
+    Uint8List img = await pickImage(ImageSource.gallery);
+    setState(() {
+      _image = img;
+    });
   }
 
   Container _selectProfilePhoto(BuildContext context) {
@@ -153,22 +159,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
           backgroundColor: MaterialStateProperty.all(blueColor),
         ),
         onPressed: () async {
-          setState(() => isloading = true);
+          setState(() => isloading = true); // Display the loading spinner
 
-          String res = await AuthService().signUpWithEmailAndPass(
-              profilePic: _image,
-              username: _usernameController.text,
-              bio: _bioController.text,
-              email: _emailController.text,
-              password: _passController.text);
-
-          setState(() => isloading = false);
-
-          if (res == "Success") {
-            Navigator.popAndPushNamed(context, '/home');
-          } else {
-            displayToast(res);
+          // Profile photo validation
+          if (_image == null) {
+            displayToast("Select a Profile photo");
           }
+
+          // Form field validation
+          else if (_usernameController.text.isEmpty ||
+              _passController.text.isEmpty ||
+              _bioController.text.isEmpty ||
+              _usernameController.text.isEmpty) {
+            displayToast("All fields are required");
+          }
+
+          // Proceed to signup
+          else {
+            String res = await FireAuth().signUpWithEmailAndPass(
+                profilePic: _image!,
+                username: _usernameController.text,
+                bio: _bioController.text,
+                email: _emailController.text,
+                password: _passController.text);
+            if (res == "Success") {
+              Navigator.popAndPushNamed(context, '/home');
+            } else {
+              displayToast(res);
+            }
+          }
+          setState(() => isloading = false); // Turn off loading spinner
         },
         child: isloading
             ? const Padding(
@@ -178,13 +198,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
             : Text(btnText),
       ),
     );
-  }
-
-  void selectImage() async {
-    Uint8List img = await pickImage(ImageSource.gallery);
-    setState(() {
-      _image = img;
-    });
   }
 
   @override

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:instagram_clone/common_utils/colors.dart';
+import 'package:instagram_clone/services/fireauth/fire_auth.dart';
 
 class AuthTextField extends StatelessWidget {
   final bool isPass;
@@ -53,29 +54,23 @@ class SwitchAuth extends StatelessWidget {
   }
 }
 
-Widget authButton(
-    {required String btnText,
-    required bool isloading,
-    required Function()? onPressed}) {
-  return SizedBox(
-    width: double.infinity,
-    child: ElevatedButton(
-      style: authButtonStyle(),
-      onPressed: onPressed,
-      child: isloading
-          ? const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(color: primaryColor),
-            )
-          : Text(btnText),
-    ),
-  );
-}
+class SignOutButton extends StatelessWidget {
+  const SignOutButton({
+    Key? key,
+  }) : super(key: key);
 
-ButtonStyle authButtonStyle() {
-  return ButtonStyle(
-    backgroundColor: MaterialStateProperty.all(blueColor),
-  );
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () async {
+        await FireAuth().logOut();
+        Navigator.popAndPushNamed(context, "/login");
+      },
+      child: const Text("Sign-out"),
+      style:
+          ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.grey)),
+    );
+  }
 }
 
 Widget instaLogo() {

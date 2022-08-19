@@ -3,13 +3,12 @@ import 'package:flutter/foundation.dart';
 import 'package:instagram_clone/globals.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:instagram_clone/common_utils/colors.dart';
+import 'package:instagram_clone/responsive_layout/layout_screens/mobile_screen_layout.dart';
+import 'package:instagram_clone/responsive_layout/layout_screens/web_screen_layout.dart';
+import 'package:instagram_clone/responsive_layout/responsive_layout.dart';
 import 'package:instagram_clone/screens/auth_pages/check_auth.dart';
-import 'package:instagram_clone/screens/home_page/home.dart';
 import 'package:instagram_clone/screens/auth_pages/login_screen.dart';
 import 'package:instagram_clone/screens/auth_pages/signup_screen.dart';
-import 'package:instagram_clone/responsive_layout/responsive_layout.dart';
-import 'package:instagram_clone/responsive_layout/layout_screens/web_screen_layout.dart';
-import 'package:instagram_clone/responsive_layout/layout_screens/mobile_screen_layout.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,14 +42,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/start',
       routes: {
-        '/': (context) => const ResponsiveLayout(
-              webScreen: WebScreenLayout(),
-              mobileScreen: MobileScreenLayout(),
-            ),
         '/start': (context) => const CheckAuth(),
-        '/home': (context) => const HomePage(),
         '/login': (context) => const LoginScreen(),
-        '/signup': (context) => const SignUpScreen(),
+        'signup': (context) => const SignUpScreen(),
+        '/home': (context) => const ResponsiveLayout(
+            webScreen: WebScreenLayout(), mobileScreen: MobileScreenLayout()),
       },
     );
   }

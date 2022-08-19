@@ -103,17 +103,28 @@ class _LoginScreenState extends State<LoginScreen> {
           backgroundColor: MaterialStateProperty.all(blueColor),
         ),
         onPressed: () async {
-          setState(() => isloading = true);
+          setState(() => isloading = true); // loading start
 
-          String res = await AuthService().loginWithEmailAndPass(
-              email: _emailController.text, password: _passController.text);
-
-          setState(() => isloading = false);
-          if (res == "Success") {
-            Navigator.popAndPushNamed(context, '/home');
-          } else {
-            displayToast(res);
+          // Text field validation
+          if (_emailController.text.isEmpty || _passController.text.isEmpty) {
+            displayToast("All fields are required");
           }
+
+          // Proceed to login
+          else {
+            String res = await FireAuth().loginWithEmailAndPass(
+                email: _emailController.text, password: _passController.text);
+
+            //  Login successful
+            if (res == "Success") {
+              Navigator.popAndPushNamed(context, '/home');
+            }
+            // Display error msg
+            else {
+              displayToast(res);
+            }
+          }
+          setState(() => isloading = false); // loading ends
         },
         child: isloading
             ? const Padding(
