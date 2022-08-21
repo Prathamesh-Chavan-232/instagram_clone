@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class UserModel {
   String profilePicUrl;
   String username;
@@ -24,4 +26,15 @@ class UserModel {
         'followers': followers,
         'following': following,
       };
+  static UserModel fromSnap(DocumentSnapshot snap) {
+    return UserModel(
+      profilePicUrl: snap['profile-pic-url'],
+      username: snap['username'],
+      email: snap['email'],
+      bio: snap['bio'],
+      uid: snap['uid'],
+      followers: snap['followers'],
+      following: snap['following'],
+    );
+  }
 }

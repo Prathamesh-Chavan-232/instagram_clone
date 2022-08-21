@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 const APP_TITLE = "Instagram clone";
 
 const APP_ICON = "assets/img/app_icon.png";

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:instagram_clone/common_utils/colors.dart';
 import 'package:instagram_clone/common_widgets/auth_widgets.dart';
+import 'package:instagram_clone/models/users.dart';
 import 'package:instagram_clone/services/firestore/firestore.dart';
 
 class MobileScreenLayout extends StatefulWidget {
@@ -19,11 +20,10 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
   }
 
   void getUserData() async {
-    DocumentSnapshot snapshot = await FirestoreMethods().getUserData();
+    UserModel userData = await FirestoreMethods().getUserData();
     setState(() {
-      username = (snapshot.data() as Map<String, dynamic>)['username'];
+      username = userData.username;
     });
-    // print(snapshot.data());
   }
 
   @override
@@ -39,8 +39,21 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
               ),
             ],
           ),
-          body: Center(child: Text('''This is a mobile
-                                  Username : $username'''))),
+          body: username == ""
+              ? _loadingUsername()
+              : Center(child: Text('Username : $username'))),
+    );
+  }
+
+  Center _loadingUsername() {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Text('Username : '),
+          CircularProgressIndicator(color: blueColor)
+        ],
+      ),
     );
   }
 }

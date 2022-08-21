@@ -20,8 +20,11 @@ class FirestoreMethods {
     await _db.collection('users').doc(user.uid).set(userModel.toJson());
   }
 
-  Future getUserData() async {
+  Future<UserModel> getUserData() async {
     final User currentUser = FireAuth().getCurrentUser()!;
-    return _db.collection('users').doc(currentUser.uid).get();
+    DocumentSnapshot snap =
+        await _db.collection('users').doc(currentUser.uid).get();
+
+    return UserModel.fromSnap(snap);
   }
 }

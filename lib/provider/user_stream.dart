@@ -1,11 +1,9 @@
-// import 'package:flutter/widgets.dart';
-// import 'package:instagram_clone/models/users.dart';
+import 'package:flutter/widgets.dart';
+import 'package:instagram_clone/models/users.dart';
 
-// class UserStream with ChangeNotifier {
-//   UserModel _user = ;
-//   Userstream()
+class UserStream with ChangeNotifier {
+  UserModel? _user;
+  UserModel get getUserData => _user!;
 
-//   UserModel get getUserData {
-
-//   }
-// }
+  Future refreshUser() async {}
+}
