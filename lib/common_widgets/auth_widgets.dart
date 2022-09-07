@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:instagram_clone/common_utils/colors.dart';
+import 'package:instagram_clone/services/fireauth/fire_auth.dart';
 
 class AuthTextField extends StatelessWidget {
   final bool isPass;
@@ -53,6 +54,25 @@ class SwitchAuth extends StatelessWidget {
   }
 }
 
+class SignOutButton extends StatelessWidget {
+  const SignOutButton({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () async {
+        await FireAuth().logOut();
+        Navigator.popAndPushNamed(context, "/login");
+      },
+      child: const Text("Sign-out"),
+      style:
+          ButtonStyle(backgroundColor: MaterialStateProperty.all(Colors.grey)),
+    );
+  }
+}
+
 Widget instaLogo() {
   return SvgPicture.asset(
     'assets/ic_instagram.svg',
@@ -61,13 +81,13 @@ Widget instaLogo() {
   );
 }
 
-void displayToast(String toastMsg) {
-  Fluttertoast.showToast(
+Future displayToast(String toastMsg) async {
+  await Fluttertoast.showToast(
       msg: toastMsg,
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.BOTTOM,
       timeInSecForIosWeb: 1,
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.black.withOpacity(0.6),
       textColor: Colors.white,
       fontSize: 14.0);
 }

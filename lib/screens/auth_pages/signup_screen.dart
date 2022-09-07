@@ -21,20 +21,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _bioController = TextEditingController();
   Uint8List? _image;
 
+  late bool isloading;
+
   @override
   void initState() {
+    isloading = false;
     super.initState();
   }
 
+  /* Contents -
+    App logo image
+    Select Profile Photo - Image picker
+    Username Text field
+    Bio Text field
+    Email Text field
+    Password Text field
+    Swtich to Login
+    Signup button
+  */
+
+  /*
+    Use Single child scroll view here since this screen has lot of content
+    Add this padding on the widget that should be visible - EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+  */
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenheight = MediaQuery.of(context).size.height;
-    // App logo image
-    // Email Text field
-    // Password Text field
-    // Forgot & Swtich to Signup
-    // Login button
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SafeArea(
@@ -43,32 +56,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
         height: screenheight,
         alignment: Alignment.bottomCenter,
         child: Padding(
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: SingleChildScrollView(
-            reverse: true,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                instaLogo(),
-                _selectProfilePhoto(context),
-                const SizedBox(height: 24),
-                _displaySignupFields(),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.03),
-                const Divider(thickness: 1.5),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text("Already have an account? "),
-                    SwitchAuth(btnText: "Log-in", path: '/login')
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: SingleChildScrollView(
+              reverse: true,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    instaLogo(),
+                    _selectProfilePhoto(context),
+                    const SizedBox(height: 24),
+                    _displaySignupFields(),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                    const Divider(thickness: 1.5),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Text("Already have an account? "),
+                        SwitchAuth(btnText: "Log-in", path: '/login')
+                      ],
+                    ),
+                  ]),
+            )),
       )),
     );
+  }
+
+  // Add action sheet
+  void selectImage() async {
+    Uint8List img = await pickImage(ImageSource.gallery);
+    setState(() {
+      _image = img;
+    });
   }
 
   Container _selectProfilePhoto(BuildContext context) {
@@ -140,29 +159,45 @@ class _SignUpScreenState extends State<SignUpScreen> {
           backgroundColor: MaterialStateProperty.all(blueColor),
         ),
         onPressed: () async {
-          String res = await AuthService().signUpWithEmailAndPass(
-              profilePic: _image,
-              username: _usernameController.text,
-              bio: _bioController.text,
-              email: _emailController.text,
-              password: _passController.text);
-          if (res == "User Signed-in successfully") {
-            displayToast(res);
-            Navigator.popAndPushNamed(context, '/home');
-          } else {
-            displayToast(res);
+          setState(() => isloading = true); // Display the loading spinner
+
+          // Profile photo validation
+          if (_image == null) {
+            displayToast("Select a Profile photo");
           }
+
+          // Form field validation
+          else if (_usernameController.text.isEmpty ||
+              _passController.text.isEmpty ||
+              _bioController.text.isEmpty ||
+              _usernameController.text.isEmpty) {
+            displayToast("All fields are required");
+          }
+
+          // Proceed to signup
+          else {
+            String res = await FireAuth().signUpWithEmailAndPass(
+                profilePic: _image!,
+                username: _usernameController.text,
+                bio: _bioController.text,
+                email: _emailController.text,
+                password: _passController.text);
+            if (res == "Success") {
+              Navigator.popAndPushNamed(context, '/home');
+            } else {
+              displayToast(res);
+            }
+          }
+          setState(() => isloading = false); // Turn off loading spinner
         },
-        child: Text(btnText),
+        child: isloading
+            ? const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: CircularProgressIndicator(color: primaryColor),
+              )
+            : Text(btnText),
       ),
     );
-  }
-
-  void selectImage() async {
-    Uint8List img = await pickImage(ImageSource.gallery);
-    setState(() {
-      _image = img;
-    });
   }
 
   @override
