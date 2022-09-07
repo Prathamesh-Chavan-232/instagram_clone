@@ -49,7 +49,6 @@ class FireAuth {
         res = err.toString();
       }
     } catch (err) {
-      print("Error in signing-in: " + err.toString());
       res = err.toString();
     }
     return res;
@@ -75,7 +74,6 @@ class FireAuth {
         res = err.toString();
       }
     } catch (err) {
-      print("Error in logging-in: " + err.toString());
       res = err.toString();
     }
     return res;
